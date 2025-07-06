@@ -9,8 +9,15 @@ from telegram.ext import (
     MessageHandler,
     CommandHandler,
     filters,
+    CallbackQueryHandler
 )
 from bot.handlers.ai_chat_handler import ai_chat_handler
+from bot.handlers.education_handler import (
+    edukasi_command,
+    kategori_dipilih_callback,
+    konten_dipilih_callback
+)
+
 
 # Load environment variables
 load_dotenv()
@@ -57,6 +64,11 @@ def main():
 
     # AI Chat Handler: semua pesan teks biasa
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ai_chat_handler))
+
+    # Education Handler
+    app.add_handler(CommandHandler("edukasi", edukasi_command))
+    app.add_handler(CallbackQueryHandler(kategori_dipilih_callback, pattern=r"^edu_cat_\d+$"))
+    app.add_handler(CallbackQueryHandler(konten_dipilih_callback, pattern=r"^edu_content_\d+$"))
 
     # Fallback handler untuk pesan yang tidak diproses
     app.add_handler(MessageHandler(filters.ALL, unknown_message))
