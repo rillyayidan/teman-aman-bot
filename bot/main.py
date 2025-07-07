@@ -17,7 +17,12 @@ from bot.handlers.education_handler import (
     kategori_dipilih_callback,
     konten_dipilih_callback
 )
-
+from bot.handlers.quiz_handler import (
+    kuis_command,
+    handle_quiz_start,
+    handle_quiz_answer,
+    handle_quiz_navigation  # ⬅️ Tambahan ini diperlukan
+)
 
 # Load environment variables
 load_dotenv()
@@ -69,6 +74,12 @@ def main():
     app.add_handler(CommandHandler("edukasi", edukasi_command))
     app.add_handler(CallbackQueryHandler(kategori_dipilih_callback, pattern=r"^edu_cat_\d+$"))
     app.add_handler(CallbackQueryHandler(konten_dipilih_callback, pattern=r"^edu_content_\d+$"))
+
+    # Quiz Handler
+    app.add_handler(CommandHandler("kuis", kuis_command))
+    app.add_handler(CallbackQueryHandler(handle_quiz_start, pattern=r"^quiz_start_"))
+    app.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_answer_"))
+    app.add_handler(CallbackQueryHandler(handle_quiz_navigation, pattern=r"^quiz_restart$"))
 
     # Fallback handler untuk pesan yang tidak diproses
     app.add_handler(MessageHandler(filters.ALL, unknown_message))
