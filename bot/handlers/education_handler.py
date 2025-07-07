@@ -19,6 +19,7 @@ async def edukasi_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(cat.name, callback_data=f"edu_cat_{cat.id}")]
             for cat in categories
         ]
+        keyboard.append([InlineKeyboardButton("🏠 Kembali ke Menu", callback_data="menu__back")])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text("📚 Pilih kategori edukasi:", reply_markup=reply_markup)
     except Exception as e:
@@ -46,6 +47,7 @@ async def kategori_dipilih_callback(update: Update, context: ContextTypes.DEFAUL
             [InlineKeyboardButton(content.title, callback_data=f"edu_content_{content.id}")]
             for content in contents
         ]
+        keyboard.append([InlineKeyboardButton("🏠 Kembali ke Menu", callback_data="menu__back")])
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text("📄 Pilih konten untuk dibaca:", reply_markup=reply_markup)
     except Exception as e:
@@ -67,7 +69,10 @@ async def konten_dipilih_callback(update: Update, context: ContextTypes.DEFAULT_
             return
 
         text = f"📘 *{content.title}*\n\n{content.content}"
-        await query.edit_message_text(text, parse_mode="Markdown")
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🏠 Kembali ke Menu", callback_data="menu__back")]
+        ])
+        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=keyboard)
     except Exception as e:
         logger.exception(f"Error saat menampilkan konten edukasi: {e}")
         await query.edit_message_text("❌ Terjadi kesalahan saat menampilkan konten.")

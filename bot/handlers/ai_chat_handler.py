@@ -9,6 +9,7 @@ from bot.prompts.openai_prompt import SYSTEM_PROMPT
 from database.models import User, ConversationLog, MessageType
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import func
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Setup OpenAI Client
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -63,7 +64,11 @@ async def ai_chat_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             max_tokens=500
         )
         ai_reply = response.choices[0].message.content
-        await update.message.reply_text(ai_reply)
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🏠 Kembali ke Menu", callback_data="menu__back")]
+        ])
+        await update.message.reply_text(ai_reply, reply_markup=keyboard)
+
 
         # 4. Simpan log chat
         log = ConversationLog(

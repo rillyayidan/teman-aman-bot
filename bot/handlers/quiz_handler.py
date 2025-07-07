@@ -20,8 +20,10 @@ async def kuis_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🟡 Easy", callback_data="quiz_start_easy")],
         [InlineKeyboardButton("🟠 Medium", callback_data="quiz_start_medium")],
         [InlineKeyboardButton("🔴 Hard", callback_data="quiz_start_hard")],
-        [InlineKeyboardButton("⚫ Very Hard", callback_data="quiz_start_very_hard")]
+        [InlineKeyboardButton("⚫ Very Hard", callback_data="quiz_start_very_hard")],
     ]
+    keyboard.append([InlineKeyboardButton("🏠 Kembali ke Menu", callback_data="menu__back")])
+
 
     # Gunakan message dari callback_query jika update.message tidak tersedia
     message = update.message or update.callback_query.message
@@ -85,6 +87,7 @@ async def send_quiz_question(context: ContextTypes.DEFAULT_TYPE, telegram_id: in
         for opt in options
     ]
     text = f"*Soal {idx+1} dari {len(state['questions'])}*\n\n{question.question}"
+    keyboard.append([InlineKeyboardButton("🏠 Kembali ke Menu", callback_data="menu__back")])
     await context.bot.send_message(
         chat_id=telegram_id,
         text=text,
@@ -150,7 +153,8 @@ async def show_quiz_results(context: ContextTypes.DEFAULT_TYPE, telegram_id: int
     result += "\n".join(explanations) if explanations else "🎉 Semua jawaban kamu benar. Hebat!"
 
     keyboard = [
-        [InlineKeyboardButton("🔁 Ulangi Kuis", callback_data="quiz_restart")]
+        [InlineKeyboardButton("🔁 Ulangi Kuis", callback_data="quiz_restart")],
+        [InlineKeyboardButton("🏠 Kembali ke Menu", callback_data="menu__back")]
     ]
     await context.bot.send_message(
         chat_id=telegram_id,

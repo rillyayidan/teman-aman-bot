@@ -23,6 +23,9 @@ from bot.handlers.quiz_handler import (
     handle_quiz_answer,
     handle_quiz_navigation  # ⬅️ Tambahan ini diperlukan
 )
+from bot.handlers.main_menu_handler import main_menu_command, menu_router_callback
+from bot.handlers.help_handler import bantuan_command
+from bot.handlers.privacy_handler import privasi_command
 
 # Load environment variables
 load_dotenv()
@@ -44,7 +47,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🛡️ Aku dirancang untuk membantu kamu memahami topik seperti *consent*, mengenali tanda-tanda kekerasan, "
         "dan cara mencari bantuan.\n\n"
         "📚 Gunakan menu untuk memilih: Edukasi, Kuis, Bantuan, atau Chat AI.\n\n"
-        "Ketik *apapun* untuk memulai percakapan atau gunakan tombol menu yang tersedia."
+        "Ketik /menu untuk melihat fitur yang ingin digunakan"
     )
     await update.message.reply_text(welcome_text, parse_mode=ParseMode.MARKDOWN)
 
@@ -81,6 +84,15 @@ def main():
     app.add_handler(CallbackQueryHandler(handle_quiz_answer, pattern=r"^quiz_answer_"))
     app.add_handler(CallbackQueryHandler(handle_quiz_navigation, pattern=r"^quiz_restart$"))
 
+    # Main Menu
+    app.add_handler(CommandHandler("menu", main_menu_command))
+    app.add_handler(CallbackQueryHandler(menu_router_callback, pattern="^menu__"))
+
+    # Bantuan
+    app.add_handler(CommandHandler("bantuan", bantuan_command))
+
+    # Privacy
+    app.add_handler(CommandHandler("privasi", privasi_command))
     # Fallback handler untuk pesan yang tidak diproses
     app.add_handler(MessageHandler(filters.ALL, unknown_message))
 

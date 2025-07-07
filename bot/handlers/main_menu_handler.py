@@ -1,42 +1,84 @@
 # bot/handlers/main_menu_handler.py
 
+import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
-from bot.state.session_manager import clear_user_feature
-from bot.state.session_manager import set_user_feature
-from bot.handlers.education_handler import edukasi_command
-from bot.handlers.quiz_handler import kuis_command
+from bot.state.session_manager import set_user_session, clear_user_session
 
+logger = logging.getLogger(__name__)
+
+# Fungsi utama: /menu command
 async def main_menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    telegram_id = update.effective_user.id
-    clear_user_feature(telegram_id)
+    user_id = update.effective_user.id
+    await clear_user_session(user_id)  # Reset sesi aktif
 
     keyboard = [
-        [InlineKeyboardButton("📚 Edukasi", callback_data="menu_edukasi")],
-        [InlineKeyboardButton("🧠 Kuis", callback_data="menu_kuis")],
-        [InlineKeyboardButton("🤖 Chat AI", callback_data="menu_aichat")],
-        [InlineKeyboardButton("🆘 Bantuan", callback_data="menu_bantuan")],
+        [
+            InlineKeyboardButton("💬 AI Chat", callback_data="menu__ai_chat"),
+            InlineKeyboardButton("📚 Edukasi", callback_data="menu__edukasi")
+        ],
+        [
+            InlineKeyboardButton("📝 Kuis", callback_data="menu__kuis"),
+            InlineKeyboardButton("🆘 Bantuan", callback_data="menu__bantuan")
+        ],
+        [
+            InlineKeyboardButton("🔐 Privasi", callback_data="menu__privasi")
+        ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("🏠 *Menu Utama*\nSilakan pilih fitur:", reply_markup=reply_markup, parse_mode="Markdown")
-    
+
+    # Gunakan message atau callback.message
+    if update.message:
+        await update.message.reply_text(
+            "🏠 *Menu Utama*\nSilakan pilih fitur yang ingin kamu gunakan:",
+            reply_markup=reply_markup,
+            parse_mode="Markdown"
+        )
+    elif update.callback_query:
+        await update.callback_query.edit_message_text(
+            "🏠 *Menu Utama*\nSilakan pilih fitur yang ingin kamu gunakan:",
+            reply_markup=reply_markup,
+            parse_mode="Markdown"
+        )
+
+
+# Fungsi callback ketika tombol fitur diklik
 async def menu_router_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    telegram_id = query.from_user.id
+    user_id = query.from_user.id
 
-    if query.data == "menu_edukasi":
-        set_user_feature(telegram_id, "edukasi")
-        await edukasi_command(update, context)
+    data = query.data  # Contoh: "menu__edukasi"
+    feature = data.split("__")[1]
+    if feature == "back":
+        await main_menu_command(update, context)
+        return
 
-    elif query.data == "menu_kuis":
-        set_user_feature(telegram_id, "kuis")
-        await kuis_command(update, context)
+    await clear_user_session(user_id)
+    await set_user_session(user_id, feature)
 
-    elif query.data == "menu_aichat":
-        set_user_feature(telegram_id, "ai_chat")
-        await query.edit_message_text("💬 Silakan ketik pertanyaanmu. Aku akan menjawab sebagai AI Chat.")
-    
-    elif query.data == "menu_bantuan":
-        set_user_feature(telegram_id, "bantuan")
-        await query.edit_message_text("📞 Untuk bantuan, hubungi layanan resmi di ...")
+    if feature == "ai_chat":
+        await query.message.reply_text("💬 *AI Chat aktif*. Ketik pertanyaanmu kapan saja.", parse_mode="Markdown")
+
+    elif feature == "edukasi":
+        from .education_handler import edukasi_command
+        # Simulasikan perintah edukasi
+        fake_update = Update(update.update_id, message=query.message)  # agar edukasi_command bisa jalan
+        await edukasi_command(fake_update, context)
+
+    elif feature == "kuis":
+        from .quiz_handler import kuis_command
+        fake_update = Update(update.update_id, message=query.message)
+        await kuis_command(fake_update, context)
+
+    elif feature == "bantuan":
+        from .help_handler import bantuan_command
+        await bantuan_command(update, context)
+
+
+    elif feature == "privasi":
+        from .privacy_handler import privasi_command
+        await privasi_command(update, context)
+
+    else:
+        await query.message.reply_text("❌ Fitur tidak dikenali.")
