@@ -1,5 +1,3 @@
-Berikut adalah draft **README.md** produksi untuk proyek ChatBot Telegram **Teman Aman** milikmu. Struktur ini dirancang profesional dan production-ready, cocok untuk GitHub atau dokumentasi tim:
-
 ---
 
 ````markdown
