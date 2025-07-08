@@ -10,6 +10,7 @@ from database.models import User, ConversationLog, MessageType
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import func
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+from bot.filters.content_filter import is_blocked_topic
 
 # Setup OpenAI Client
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -20,7 +21,14 @@ logger = logging.getLogger(__name__)
 async def ai_chat_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text.strip()
     telegram_user = update.effective_user
-
+    
+    if is_blocked_topic(user_message):
+        await update.message.reply_text(
+            "⚠️ Maaf, aku hanya bisa bantu untuk topik kekerasan seksual, consent, pelecehan, bullying, dan perlindungan diri. "
+            "Untuk pertanyaan seperti itu, silakan cari bantuan dari sumber yang lebih tepat ya. 🙏"
+        )
+        return
+    
     if not user_message:
         await update.message.reply_text("❗ Mohon ketik sesuatu.")
         return
