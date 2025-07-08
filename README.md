@@ -64,7 +64,7 @@ DB_PASSWORD=
 ### 4. Inisialisasi Database
 
 ```bash
-python database/init_db.py
+python -m database.init_db
 ```
 
 Tambahkan data dummy melalui phpMyAdmin untuk tabel:
@@ -78,7 +78,7 @@ Tambahkan data dummy melalui phpMyAdmin untuk tabel:
 ### 5. Jalankan Bot
 
 ```bash
-python bot.main
+python -m bot.main
 ```
 
 ---
